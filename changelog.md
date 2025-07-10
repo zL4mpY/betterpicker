@@ -1,3 +1,8 @@
+# 1.0.3
+
+-   Added setting descriptions
+-   Added "Affect slider" setting that makes S and V/L affect slider color
+
 # 1.0.2
 
 -   Made the color picker only get replaced in the editor
