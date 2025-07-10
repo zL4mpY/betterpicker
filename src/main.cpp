@@ -51,9 +51,13 @@ class $modify(MyCCControlColourPicker, CCControlColourPicker) {
         TextInput* vlInput;
         CCLabelBMFont* vlLabel;
 
-        EventListener<SettingChangedFilterV3> m_settingListener = {
+        EventListener<SettingChangedFilterV3> m_colorSpaceSettingListener = {
             [this](std::shared_ptr<SettingV3> setting) { return ListenerResult::Propagate; },
             SettingChangedFilterV3(Mod::get(), "color-space")
+        };
+        EventListener<SettingChangedFilterV3> m_affectSliderSettingListener = {
+            [this](std::shared_ptr<SettingV3> setting) { return ListenerResult::Propagate; },
+            SettingChangedFilterV3(Mod::get(), "affect-slider")
         };
     };
 
@@ -78,13 +82,21 @@ bool MyCCControlColourPicker::init() {
     getChildByType<CCControlSaturationBrightnessPicker>(0)->setVisible(false);
 
     m_fields->squareDrawThrottle = 0;
-    m_fields->m_settingListener = {
+    m_fields->m_colorSpaceSettingListener = {
         [this](std::shared_ptr<SettingV3> setting) {
             setColorValue(m_rgb);
 
             return ListenerResult::Propagate;
         },
         SettingChangedFilterV3(Mod::get(), "color-space")
+    };
+    m_fields->m_affectSliderSettingListener = {
+        [this](std::shared_ptr<SettingV3> setting) {
+            setColorValue(m_rgb);
+
+            return ListenerResult::Propagate;
+        },
+        SettingChangedFilterV3(Mod::get(), "affect-slider")
     };
 
     m_fields->squareDraw = CCDrawNode::create();
@@ -278,8 +290,14 @@ void MyCCControlColourPicker::hsvlChanged(bool setRgb, bool redrawSquare) {
     m_fields->pickerDot->setPosition(CCPoint(-80 + m_fields->hsvl.y * 120.0, -45 + m_fields->hsvl.z * 120.0));
     m_fields->pickerDot->setColor(m_rgb);
 
+    auto sliderS = 1.0f;
+    auto sliderVL = conv.sliderVL;
+    if (Mod::get()->getSettingValue<bool>("affect-slider")) {
+        sliderS = m_fields->hsvl.y;
+        sliderVL = m_fields->hsvl.z;
+    }
     m_fields->sliderHandle->setPositionY(-45 + m_fields->hsvl.x * 120.0);
-    m_fields->sliderHandle->setColor(tripleToB(conv.toRgb(m_fields->hsvl.x, 1.0, conv.sliderVL)));
+    m_fields->sliderHandle->setColor(tripleToB(conv.toRgb(m_fields->hsvl.x, sliderS, sliderVL)));
 
     if (redrawSquare) {
         m_fields->squareDraw->clear();
@@ -299,7 +317,7 @@ void MyCCControlColourPicker::hsvlChanged(bool setRgb, bool redrawSquare) {
     // slider is cheap to draw so id rather always have it here than add another param that i could potentially mess up
     m_fields->sliderDraw->clear();
     for (int y = 0; y < 120; y += 1) {
-        auto v = conv.toRgb(y / 120.f, 1.0, conv.sliderVL);
+        auto v = conv.toRgb(y / 120.f, sliderS, sliderVL);
         m_fields->sliderDraw->drawRect(
             CCPoint(0, y),
             CCPoint(20, y + 1),

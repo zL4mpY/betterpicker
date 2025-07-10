@@ -22,7 +22,14 @@
             "type": "string",
             "name": "Color Space",
             "default": "HSV",
-            "one-of": ["HSV", "HSL", "OkHSV", "OkHSL"]
+            "one-of": ["HSV", "HSL", "OkHSV", "OkHSL"],
+            "description": "HSV/HSL are common color spaces but not very perceptually accurate (for example, a full saturation yellow and deep blue are considered the same brightness, even though we obviously perceive yellow as brighter)\n\nOkHSV/OkHSL attempt to be more perceptually accurate"
+        },
+        "affect-slider": {
+            "type": "bool",
+            "name": "S and V/L affects slider",
+            "default": false,
+            "description": "The saturation and value/lightness will affect the slider colors"
         }
     },
     "tags": ["editor", "enhancement", "utility"]
