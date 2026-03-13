@@ -14,7 +14,7 @@ TouchArea* TouchArea::create(TouchAreaStartCB start_cb, TouchAreaMoveCB move_cb,
 bool TouchArea::init(TouchAreaStartCB start_cb, TouchAreaMoveCB move_cb, TouchAreaEndCB end_cb) {
     setTouchMode(cocos2d::kCCTouchesOneByOne);
     setTouchEnabled(true);
-    setTouchPriority(CCTouchDispatcher::get()->getForcePrio() - 1);
+    setTouchPriority(CCTouchDispatcher::get()->getTargetPrio() - 1);
     m_startCB = start_cb;
     m_moveCB = move_cb;
     m_endCB = end_cb;

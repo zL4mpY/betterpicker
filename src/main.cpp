@@ -51,14 +51,22 @@ class $modify(MyCCControlColourPicker, CCControlColourPicker) {
         TextInput* vlInput;
         CCLabelBMFont* vlLabel;
 
-        EventListener<SettingChangedFilterV3> m_colorSpaceSettingListener = {
-            [this](std::shared_ptr<SettingV3> setting) { return ListenerResult::Propagate; },
-            SettingChangedFilterV3(Mod::get(), "color-space")
-        };
-        EventListener<SettingChangedFilterV3> m_affectSliderSettingListener = {
-            [this](std::shared_ptr<SettingV3> setting) { return ListenerResult::Propagate; },
-            SettingChangedFilterV3(Mod::get(), "affect-slider")
-        };
+        // EventListener<SettingChangedEventV3> m_colorSpaceSettingListener = {
+        //     [this](std::shared_ptr<SettingV3> setting) { return ListenerResult::Propagate; },
+        //     SettingChangedEventV3(Mod::get(), "color-space")
+        // };
+        // EventListener<SettingChangedEventV3> m_affectSliderSettingListener = {
+        //     [this](std::shared_ptr<SettingV3> setting) { return ListenerResult::Propagate; },
+        //     SettingChangedEventV3(Mod::get(), "affect-slider")
+        // };
+
+        ListenerHandle m_colorSpaceSettingListener = SettingChangedEventV3().listen([this](std::shared_ptr<SettingV3> setting) {
+            return ListenerResult::Propagate;
+        });
+
+        ListenerHandle m_affectSliderSettingListener = SettingChangedEventV3().listen([this](std::shared_ptr<SettingV3> setting) {
+            return ListenerResult::Propagate;
+        });
     };
 
     virtual bool init();
@@ -82,22 +90,33 @@ bool MyCCControlColourPicker::init() {
     getChildByType<CCControlSaturationBrightnessPicker>(0)->setVisible(false);
 
     m_fields->squareDrawThrottle = 0;
-    m_fields->m_colorSpaceSettingListener = {
-        [this](std::shared_ptr<SettingV3> setting) {
-            setColorValue(m_rgb);
+    // m_fields->m_colorSpaceSettingListener = {
+    //     [this](std::shared_ptr<SettingV3> setting) {
+    //         setColorValue(m_rgb);
 
-            return ListenerResult::Propagate;
-        },
-        SettingChangedFilterV3(Mod::get(), "color-space")
-    };
-    m_fields->m_affectSliderSettingListener = {
-        [this](std::shared_ptr<SettingV3> setting) {
-            setColorValue(m_rgb);
+    //         return ListenerResult::Propagate;
+    //     },
+    //     SettingChangedEventV3(Mod::get(), "color-space")
+    // };
 
-            return ListenerResult::Propagate;
-        },
-        SettingChangedFilterV3(Mod::get(), "affect-slider")
-    };
+    m_fields->m_colorSpaceSettingListener = SettingChangedEventV3().listen([this](std::shared_ptr<SettingV3> setting) {
+        setColorValue(m_rgb);
+        return ListenerResult::Propagate;
+    });
+
+    // m_fields->m_affectSliderSettingListener = {
+    //     [this](std::shared_ptr<SettingV3> setting) {
+    //         setColorValue(m_rgb);
+
+    //         return ListenerResult::Propagate;
+    //     },
+    //     SettingChangedEventV3(Mod::get(), "affect-slider")
+    // };
+
+    m_fields->m_affectSliderSettingListener = SettingChangedEventV3().listen([this](std::shared_ptr<SettingV3> setting) {
+        setColorValue(m_rgb);
+        return ListenerResult::Propagate;
+    });
 
     m_fields->squareDraw = CCDrawNode::create();
     addChild(m_fields->squareDraw);
@@ -184,7 +203,7 @@ bool MyCCControlColourPicker::init() {
     btn->setPosition(65.0, -68.0);
     menu->addChild(btn);
     menu->setPosition(CCPoint(0, 0));
-    menu->setTouchPriority(CCTouchDispatcher::get()->getForcePrio() - 1);
+    menu->setTouchPriority(CCTouchDispatcher::get()->getTargetPrio() - 1);
 
     addChild(menu);
 
